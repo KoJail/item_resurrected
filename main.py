@@ -58,11 +58,18 @@ class AppWindow(QMainWindow):
         name = self.ui.addName_lineEdit.text()
         description = self.ui.addDesc_textEdit.toPlainText()
         information = self.ui.addInfo_textEdit.toPlainText()
-        self.id += 1
-        newDict = {'ID': self.id, 'name': name, 'desc': description, 'info': information}
-        self.data.append(newDict)
-        self.dataLen += 1
-        self.updateData()
+        if name == '' or description == '' or information == '':
+            reply = QMessageBox.information(self, "消息对话框", "请完善信息", QMessageBox.Ok, QMessageBox.Ok)
+        else:
+            self.id += 1
+            newDict = {'ID': self.id, 'name': name, 'desc': description, 'info': information}
+            self.data.append(newDict)
+            self.dataLen += 1
+            self.updateData()
+            self.ui.addName_lineEdit.clear()
+            self.ui.addDesc_textEdit.clear()
+            self.ui.addInfo_textEdit.clear()
+
 
     def delteItem(self):
         id = self.ui.delID_lineEdit.text()
@@ -80,10 +87,12 @@ class AppWindow(QMainWindow):
                         if self.data[i]['ID'] == idInt:
                             self.data.pop(i)
                             self.dataLen -= 1
-                            self.displayItem()
+                            self.updateData()
+                            self.ui.delID_lineEdit.clear()
                             break
                 else:
                     reply = QMessageBox.information(self, "消息对话框", "请输入合法ID或选择有效的物品。", QMessageBox.Ok, QMessageBox.Ok)
+                    self.ui.delID_lineEdit.clear()
         else:
             if id != '':
                 reply = QMessageBox.information(self, "消息对话框", "请不要同时输入ID与选择物品。", QMessageBox.Ok,  QMessageBox.Ok)
@@ -95,7 +104,7 @@ class AppWindow(QMainWindow):
                         if self.data[i]['name'] == item:
                             self.data.pop(i)
                             self.dataLen -= 1
-                    self.displayItem()
+                    self.updateData()
 
     # 显示所有物品信息
     def displayItem(self):
