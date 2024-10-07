@@ -1,16 +1,29 @@
-# This is a sample Python script.
+import sys
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+from PyQt5.QtWidgets import QMainWindow, QApplication
+
+from window import Ui_MainWindow
+
+class AppWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self)
+        self.setWindowTitle('resurrection of items')
+
+        self.show()
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
 
-
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    print_hi('PyCharm')
+    # 只有直接运行这个脚本，才会往下执行
+    # 别的脚本文件执行，不会调用这个条件句
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    # 实例化，传参
+    app = QApplication(sys.argv)
+
+    # 创建对象
+    appWindow = AppWindow()
+
+    # 进入程序的主循环，并通过exit函数确保主循环安全结束(该释放资源的一定要释放)
+    sys.exit(app.exec_())
