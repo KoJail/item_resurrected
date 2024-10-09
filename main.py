@@ -74,8 +74,10 @@ class AppWindow(QMainWindow):
     def delteItem(self):
         id = self.ui.delID_lineEdit.text()
         item = self.ui.delName_comboBox.currentText()
+        # 无物品
         if item == '无物品':
             reply = QMessageBox.information(self, "消息对话框", "目前没有物品，请添加物品。", QMessageBox.Ok, QMessageBox.Ok)
+        # 有物品且仅输入id
         elif item == '(请选择)':
             if id == '':
                 reply = QMessageBox.information(self, "消息对话框", "请输入ID或选择有效的物品。", QMessageBox.Ok, QMessageBox.Ok)
@@ -93,6 +95,7 @@ class AppWindow(QMainWindow):
                 else:
                     reply = QMessageBox.information(self, "消息对话框", "请输入合法ID或选择有效的物品。", QMessageBox.Ok, QMessageBox.Ok)
                     self.ui.delID_lineEdit.clear()
+        # 有物品且仅选择物品
         else:
             if id != '':
                 reply = QMessageBox.information(self, "消息对话框", "请不要同时输入ID与选择物品。", QMessageBox.Ok,  QMessageBox.Ok)
@@ -140,6 +143,7 @@ class AppWindow(QMainWindow):
                     self.ui.tableWidget.setItem(row, 2, QTableWidgetItem(self.data[i]['desc']))
                     self.ui.tableWidget.setItem(row, 3, QTableWidgetItem(self.data[i]['info']))
 
+    # 用于在程序关闭时把剩下的记录存入文件中
     def saveAllInfos(self):
         with open(self.dataPath, 'w')as file:
             json.dump(self.data, file, indent=4)
