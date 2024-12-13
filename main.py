@@ -1,6 +1,7 @@
 import os
 import sys
 
+import sqlite3
 from PyQt5.QtWidgets import QMainWindow, QApplication, QAbstractItemView, QTableWidgetItem, QMessageBox
 
 from window import Ui_MainWindow
@@ -39,20 +40,51 @@ class AppWindow(QMainWindow):
         self.show()
 
     def loadAllInfos(self):
-        # 检查是否存在json，若无则新建
-        if not os.path.exists(self.dataPath):
-            with open(self.dataPath, 'w') as file:
-                json.dump([], file, indent=4)
+        # 连接到SQLite数据库文件，如果不存在则创建它
+        conn = sqlite3.connect('data.db')
+        # 创建一个游标对象
+        cur = conn.cursor()
+        # 建表
+        cur.execute('''  
+            CREATE TABLE IF NOT EXISTS users (  
+                user_id INTEGER PRIMARY KEY AUTOINCREMENT,  
+                user_name TEXT NOT NULL,  
+                password TEXT NOT NULL,
+                address TEXT,
+                phone TEXT NOT NULL
+            )  
+        ''')
+        cur.execute('''  
+            CREATE TABLE IF NOT EXISTS items (  
+                item_id INTEGER PRIMARY KEY AUTOINCREMENT,  
+                item_name TEXT NOT NULL, 
+                description TEXT NOT NULL, 
+                address TEXT,
+                phone TEXT NOT NULL,
+                mail TEXT 
+            )  
+        ''')
 
-        # 获取数据，更新列表
-        with open(self.dataPath, 'r') as file:
-            self.data = json.load(file)
-            self.dataLen = len(self.data)
-            if self.dataLen == 0:
-                self.id = 0
-            else:
-                self.id = self.data[self.dataLen-1]['ID']
-            self.updateData()
+        self.data = cur.execute("SELECT * FROM items")
+        # 提交事务
+        conn.commit()
+        # 关闭连接
+        conn.close()
+
+        # # 检查是否存在json，若无则新建
+        # if not os.path.exists(self.dataPath):
+        #     with open(self.dataPath, 'w') as file:
+        #         json.dump([], file, indent=4)
+        #
+        # # 获取数据，更新列表
+        # with open(self.dataPath, 'r') as file:
+        #     self.data = json.load(file)
+        #     self.dataLen = len(self.data)
+        #     if self.dataLen == 0:
+        #         self.id = 0
+        #     else:
+        #         self.id = self.data[self.dataLen-1]['ID']
+        #     self.updateData()
 
     def addItem(self):
         name = self.ui.addName_lineEdit.text()
@@ -93,12 +125,12 @@ class AppWindow(QMainWindow):
                             self.ui.delID_lineEdit.clear()
                             break
                 else:
-                    reply = QMessageBox.information(self, "消息对话框", "请输入合法ID或选择有效的物品。", QMessageBox.Ok, QMessageBox.Ok)
+                    QMessageBox.information(self, "消息对话框", "请输入合法ID或选择有效的物品。", QMessageBox.Ok, QMessageBox.Ok)
                     self.ui.delID_lineEdit.clear()
         # 有物品且仅选择物品
         else:
             if id != '':
-                reply = QMessageBox.information(self, "消息对话框", "请不要同时输入ID与选择物品。", QMessageBox.Ok,  QMessageBox.Ok)
+                QMessageBox.information(self, "消息对话框", "请不要同时输入ID与选择物品。", QMessageBox.Ok,  QMessageBox.Ok)
             else:
                 # 删除所有指定物品，注意应该倒序删除
                 reply = QMessageBox.information(self, "消息对话框", "该操作可能会删除多条信息，您确认吗？", QMessageBox.Yes | QMessageBox.Cancel,  QMessageBox.Yes)
