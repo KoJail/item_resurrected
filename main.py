@@ -4,7 +4,7 @@ import sys
 import sqlite3
 from PyQt5.QtWidgets import QMainWindow, QApplication, QAbstractItemView, QTableWidgetItem, QMessageBox
 
-from window import Ui_MainWindow
+from mainW import Ui_MainWindow
 
 import json
 

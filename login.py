@@ -4,6 +4,7 @@ import sqlite3
 from PyQt5.QtWidgets import QWidget, QApplication, QMessageBox, QLineEdit
 
 from loginW import Ui_LoginWindow
+from registerW import Ui_RegisterWindow
 
 class LoginWindow(QWidget):
     def __init__(self):
@@ -11,7 +12,7 @@ class LoginWindow(QWidget):
         super().__init__()
         self.ui = Ui_LoginWindow()
         self.ui.setupUi(self)
-        self.ui.password_lineEdit.setEchoMode(QLineEdit.Password)
+        self.setWindowTitle('login_page')
 
         # 数据库相关操作
         conn = sqlite3.connect('user.db')
@@ -39,10 +40,8 @@ class LoginWindow(QWidget):
         conn.close()
 
         # 信号与槽
-        self.ui.login_pushButton.clicked.connect((self.login))
-        self.ui.register_pushButton.clicked.connect((self.register))
-
-        self.show()
+        self.ui.login_pushButton.clicked.connect(self.login)
+        self.ui.register_pushButton.clicked.connect(self.register)
 
     def login(self):
         userName = self.ui.userName_lineEdit.text()
@@ -58,18 +57,83 @@ class LoginWindow(QWidget):
             cur.execute("SELECT password FROM users WHERE user_name=?", (userName,))
             users_pas = cur.fetchone()
 
-            if password == admin_pas[0]: # 管理员登录
+            if admin_pas is None:
+                if users_pas is None:
+                    QMessageBox.information(self, "消息对话框", "用户名或密码错误！", QMessageBox.Ok, QMessageBox.Ok)
+                elif password == users_pas[0]:  # 普通用户登录
+                    print('user sucess')
+                else:
+                    QMessageBox.information(self, "消息对话框", "用户名或密码错误！", QMessageBox.Ok, QMessageBox.Ok)
+            elif password == admin_pas[0]: # 管理员登录
                 print('admin sucess')
-            elif password == users_pas[0]: # 普通用户登录
-                print('user sucess')
             else:
-                QMessageBox.information(self, "消息对话框", "密码错误！", QMessageBox.Ok, QMessageBox.Ok)
+                QMessageBox.information(self, "消息对话框", "用户名或密码错误！", QMessageBox.Ok, QMessageBox.Ok)
 
             conn.close()
 
     def register(self):
-        return
+        rw.show()
+        lw.close()
 
+class RegisterWindow(QWidget):
+    def __init__(self):
+        # UI建立
+        super().__init__()
+        self.ui = Ui_RegisterWindow()
+        self.ui.setupUi(self)
+        self.setWindowTitle('register_page')
+
+        # 信号与槽
+        self.ui.confirm_pushButton.clicked.connect(self.register)
+        self.ui.cancel_pushButton.clicked.connect(self.quit)
+
+    def register(self):
+        registerdone = False
+        name = self.ui.userName_lineEdit.text()
+        password = self.ui.password_lineEdit.text()
+        repassword = self.ui.repassword_lineEdit.text()
+        address = self.ui.adress_lineEdit.text()
+        phone = self.ui.phone_lineEdit.text()
+        aduserName = self.ui.aduserName_lineEdit.text()
+        adpassword = self.ui.adpassword_lineEdit.text()
+
+        if name == '' or password == '' or repassword == '' or phone == '':
+            QMessageBox.information(self, "消息对话框", "请输入完整的信息", QMessageBox.Ok, QMessageBox.Ok)
+        elif adpassword == '' or aduserName == '':
+            QMessageBox.information(self, "消息对话框", "请输入管理员用户名与密码", QMessageBox.Ok, QMessageBox.Ok)
+        elif password != repassword:
+            QMessageBox.information(self, "消息对话框", "两次输入密码不一致！", QMessageBox.Ok, QMessageBox.Ok)
+        else: # 判断是否可以成功注册
+            conn = sqlite3.connect('user.db')
+            cur = conn.cursor()
+            cur.execute("SELECT password FROM admin WHERE admin_name=?", (aduserName,))
+            admin_pas = cur.fetchone()
+            if admin_pas is None or admin_pas[0] != adpassword:
+                QMessageBox.information(self, "消息对话框", "管理员账号或密码错误", QMessageBox.Ok, QMessageBox.Ok)
+            else:
+                cur.execute("SELECT password FROM users WHERE user_name=?", (name,))
+                user_pas = cur.fetchone()
+                cur.execute("SELECT password FROM admin WHERE admin_name=?", (name,))
+                ad_pas = cur.fetchone()
+                if user_pas is not None or ad_pas is not None:
+                    QMessageBox.information(self, "消息对话框", "用户名重复！", QMessageBox.Ok, QMessageBox.Ok)
+                else:
+                    cur.execute("INSERT INTO users (user_name,password,address,phone) VALUES (?,?,?,?)", (name,password,address,phone))
+                    registerdone = True
+                    QMessageBox.information(self, "消息对话框", "注册成功，即将为您跳转至登陆界面", QMessageBox.Ok, QMessageBox.Ok)
+            conn.commit()
+            conn.close()
+
+        if registerdone == True:
+            self.quit()
+
+    def quit(self):
+        lw.show()
+        rw.close()
+
+    def closeEvent(self, event):
+        lw.show()
+        event.accept()
 
 if __name__ == '__main__':
     # 只有直接运行这个脚本，才会往下执行
@@ -78,8 +142,10 @@ if __name__ == '__main__':
     # 实例化，传参
     app = QApplication(sys.argv)
 
-    # 创建对象
-    w = LoginWindow()
+    # 创建对象，这个地方一定是可以改进的，不然会导致所有窗体都在内存中
+    lw = LoginWindow()
+    rw = RegisterWindow()
+    lw.show()
 
     # 进入程序的主循环，并通过exit函数确保主循环安全结束(该释放资源的一定要释放)
     sys.exit(app.exec_())

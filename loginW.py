@@ -32,6 +32,7 @@ class Ui_LoginWindow(object):
         self.userName_lineEdit.setObjectName("userName_lineEdit")
         self.password_lineEdit = QtWidgets.QLineEdit(LoginWindow)
         self.password_lineEdit.setGeometry(QtCore.QRect(120, 125, 231, 21))
+        self.password_lineEdit.setEchoMode(QtWidgets.QLineEdit.Password)
         self.password_lineEdit.setObjectName("password_lineEdit")
 
         self.retranslateUi(LoginWindow)
