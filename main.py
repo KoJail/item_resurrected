@@ -65,7 +65,7 @@ class AppWindow(QMainWindow):
             )  
         ''')
 
-        self.data = cur.execute("SELECT * FROM items")
+        cur.execute("SELECT * FROM items")
         rows = cur.fetchall()
         for row in rows:
             print(row)
