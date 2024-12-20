@@ -61,19 +61,27 @@ class LoginWindow(QWidget):
                 if users_pas is None:
                     QMessageBox.information(self, "消息对话框", "用户名或密码错误！", QMessageBox.Ok, QMessageBox.Ok)
                 elif password == users_pas[0]:  # 普通用户登录
-                    print('user sucess')
+                    self.goToMain()
                 else:
                     QMessageBox.information(self, "消息对话框", "用户名或密码错误！", QMessageBox.Ok, QMessageBox.Ok)
             elif password == admin_pas[0]: # 管理员登录
-                print('admin sucess')
+                self.goToMain()
             else:
                 QMessageBox.information(self, "消息对话框", "用户名或密码错误！", QMessageBox.Ok, QMessageBox.Ok)
 
             conn.close()
 
     def register(self):
-        rw.show()
-        lw.close()
+        self.rw.show()
+        self.close()
+
+    def goToMain(self):
+        self.mw.show()
+        self.close()
+
+    def setReferences(self, rw, mw):
+        self.rw = rw
+        self.mw = mw
 
 class RegisterWindow(QWidget):
     def __init__(self):
@@ -128,24 +136,27 @@ class RegisterWindow(QWidget):
             self.quit()
 
     def quit(self):
-        lw.show()
-        rw.close()
+        self.lw.show()
+        self.close()
 
     def closeEvent(self, event):
-        lw.show()
+        self.lw.show()
         event.accept()
 
-if __name__ == '__main__':
-    # 只有直接运行这个脚本，才会往下执行
-    # 别的脚本文件执行，不会调用这个条件句
+    def set_references(self, lw):
+        self.lw = lw
 
-    # 实例化，传参
-    app = QApplication(sys.argv)
-
-    # 创建对象，这个地方一定是可以改进的，不然会导致所有窗体都在内存中
-    lw = LoginWindow()
-    rw = RegisterWindow()
-    lw.show()
-
-    # 进入程序的主循环，并通过exit函数确保主循环安全结束(该释放资源的一定要释放)
-    sys.exit(app.exec_())
+# if __name__ == '__main__':
+#     # 只有直接运行这个脚本，才会往下执行
+#     # 别的脚本文件执行，不会调用这个条件句
+#
+#     # 实例化，传参
+#     app = QApplication(sys.argv)
+#
+#     # 创建对象，这个地方一定是可以改进的，不然会导致所有窗体都在内存中
+#     lw = LoginWindow()
+#     rw = RegisterWindow()
+#     lw.show()
+#
+#     # 进入程序的主循环，并通过exit函数确保主循环安全结束(该释放资源的一定要释放)
+#     sys.exit(app.exec_())
