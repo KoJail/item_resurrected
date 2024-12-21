@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'mainW.ui'
+# Form implementation generated from reading ui file 'window.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.9
 #
@@ -93,9 +93,6 @@ class Ui_MainWindow(object):
         self.findName_pushButton = QtWidgets.QPushButton(self.groupBox)
         self.findName_pushButton.setGeometry(QtCore.QRect(20, 135, 221, 28))
         self.findName_pushButton.setObjectName("findName_pushButton")
-        self.sort_comboBox = QtWidgets.QComboBox(self.centralwidget)
-        self.sort_comboBox.setGeometry(QtCore.QRect(260, 0, 161, 22))
-        self.sort_comboBox.setObjectName("sort_comboBox")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1112, 26))

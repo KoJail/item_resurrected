@@ -1,7 +1,7 @@
 import sys
 
 import sqlite3
-from PyQt5.QtWidgets import QWidget, QApplication, QMessageBox, QLineEdit
+from PyQt5.QtWidgets import QWidget, QMessageBox
 
 from loginW import Ui_LoginWindow
 from registerW import Ui_RegisterWindow
