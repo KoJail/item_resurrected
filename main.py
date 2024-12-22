@@ -30,26 +30,26 @@ class MainWindow(QMainWindow):
                     CREATE TABLE IF NOT EXISTS 食物 (  
                         ID INTEGER PRIMARY KEY AUTOINCREMENT,  
                         名称 TEXT NOT NULL,
-                        保质期 TEXT NOT NULL,
-                        数量 TEXT NOT NULL,
                         联系人 TEXT NOT NULL,
                         地址 TEXT NOT NULL,
                         手机 TEXT NOT NULL,
                         邮箱 TEXT NOT NULL,
-                        描述 TEXT NOT NULL
+                        描述 TEXT NOT NULL,
+                        保质期 TEXT,
+                        数量 TEXT
                     )  
                 ''')
         cur.execute('''
                     CREATE TABLE IF NOT EXISTS 书籍 (  
                         ID INTEGER PRIMARY KEY AUTOINCREMENT,  
                         名称 TEXT NOT NULL,
-                        作者 TEXT NOT NULL,
-                        出版社 TEXT NOT NULL,
                         联系人 TEXT NOT NULL,
                         地址 TEXT NOT NULL,
                         手机 TEXT NOT NULL,
                         邮箱 TEXT NOT NULL,
-                        描述 TEXT NOT NULL
+                        描述 TEXT NOT NULL,
+                        作者 TEXT,
+                        出版社 TEXT
                     )  
                 ''')
         cur.execute('''
@@ -203,16 +203,42 @@ class MainWindow(QMainWindow):
         self.close()
 
     def back2Login(self):
-        print(1)
+        self.lw.show()
+        self.close()
 
     def helpMe(self):
-        print(3)
+        QMessageBox.information(self, "消息对话框", "詳情可見https://github.com/KoJail/item_resurrected", QMessageBox.Ok, QMessageBox.Ok)
 
     # 这个地方有希望改，写的比较烂
-    def set_references(self, aw):
+    def set_references(self, aw, lw):
         self.aw = aw
+        self.lw = lw
 
-# #主程序
+#主程序
+if __name__ == '__main__':
+    # 只有直接运行这个脚本，才会往下执行
+    # 别的脚本文件执行，不会调用这个条件句
+
+    # 实例化，传参
+    app = QApplication(sys.argv)
+
+    # 创建对象，这里我直接全部预加载了，因为页面本来就少不影响
+    lw = LoginWindow()
+    rw = RegisterWindow()
+    mw = MainWindow()
+    aw = AdminWindow()
+    # 这边做法比较粗暴，相互引用一下
+    lw.setReferences(rw, mw)
+    rw.set_references(lw)
+    mw.set_references(aw, lw)
+    aw.set_references(mw)
+    # 显示初始界面
+    lw.show()
+
+    # 进入程序的主循环，并通过exit函数确保主循环安全结束(该释放资源的一定要释放)
+    sys.exit(app.exec_())
+
+# # 单独测试主窗口
 # if __name__ == '__main__':
 #     # 只有直接运行这个脚本，才会往下执行
 #     # 别的脚本文件执行，不会调用这个条件句
@@ -221,30 +247,11 @@ class MainWindow(QMainWindow):
 #     app = QApplication(sys.argv)
 #
 #     # 创建对象
-#     lw = LoginWindow()
-#     rw = RegisterWindow()
 #     mw = MainWindow()
-#     lw.setReferences(rw, mw)
-#     rw.set_references(lw)
-#     lw.show()
+#     aw = AdminWindow()
+#     mw.set_references(aw)
+#     aw.set_references(mw)
+#     mw.show()
 #
 #     # 进入程序的主循环，并通过exit函数确保主循环安全结束(该释放资源的一定要释放)
 #     sys.exit(app.exec_())
-
-# 单独测试主窗口
-if __name__ == '__main__':
-    # 只有直接运行这个脚本，才会往下执行
-    # 别的脚本文件执行，不会调用这个条件句
-
-    # 实例化，传参
-    app = QApplication(sys.argv)
-
-    # 创建对象
-    mw = MainWindow()
-    aw = AdminWindow()
-    mw.set_references(aw)
-    aw.set_references(mw)
-    mw.show()
-
-    # 进入程序的主循环，并通过exit函数确保主循环安全结束(该释放资源的一定要释放)
-    sys.exit(app.exec_())

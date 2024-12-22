@@ -46,8 +46,10 @@ class AdminWindow(QWidget):
             columns = [info[1] for info in infos]
             for attribute in attributeArray:
                 if attribute not in columns:
-                    cur.execute(f"ALTER TABLE {tableName} INSERT COLUMN {attribute} TEXT BEFORE 联系人")
+                    cur.execute(f"ALTER TABLE {tableName} ADD COLUMN {attribute} TEXT")
             QMessageBox.information(self, "消息对话框", "操作成功！", QMessageBox.Ok, QMessageBox.Ok)
+            conn.commit()
+            conn.close()
             self.refreshSort()
 
 
