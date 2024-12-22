@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QTableWidgetItem, QHeader
 
 from login import LoginWindow, RegisterWindow
 from dialog import InputDialog
+from adminOperate import AdminWindow
 from mainW import Ui_MainWindow
 
 class MainWindow(QMainWindow):
@@ -55,8 +56,8 @@ class MainWindow(QMainWindow):
                     CREATE TABLE IF NOT EXISTS 工具 (  
                         ID INTEGER PRIMARY KEY AUTOINCREMENT,  
                         名称 TEXT NOT NULL,
-                        地址 TEXT NOT NULL,
                         联系人 TEXT NOT NULL,
+                        地址 TEXT NOT NULL,
                         手机 TEXT NOT NULL,
                         邮箱 TEXT NOT NULL,
                         描述 TEXT NOT NULL
@@ -72,6 +73,10 @@ class MainWindow(QMainWindow):
         self.ui.findKeyWord_pushButton.clicked.connect(self.findItem)
         # 表格右击的信号与槽
         self.ui.tableWidget.customContextMenuRequested.connect(self.showContextMenu)
+        # 更多操作的信号与槽
+        self.ui.quitAction.triggered.connect(self.back2Login)
+        self.ui.adminAction.triggered.connect(self.adminOperate)
+        self.ui.helpAction.triggered.connect(self.helpMe)
 
         self.refreshSort()
 
@@ -124,7 +129,6 @@ class MainWindow(QMainWindow):
             self.ui.tableWidget.horizontalHeader().setSectionResizeMode(i,QHeaderView.ResizeToContents)  # 设置第i列要根据内容使用宽度
 
     # 表格右击删除相关
-
     def showContextMenu(self, pos):
         # 获取当前选中的行
         indexes = self.ui.tableWidget.selectedIndexes()
@@ -158,7 +162,6 @@ class MainWindow(QMainWindow):
             self.displayItem()
 
     # 刷新
-
     # 显示所有同一类的条目，需要和findItem的用到的showItem函数区分
     def displayItem(self):
         tableName = self.ui.sort_comboBox.currentText()
@@ -175,9 +178,13 @@ class MainWindow(QMainWindow):
         # 表格显示
         self.showItem(rows, columns)
 
+    # 注意，理论上会同时刷新表格
     def refreshSort(self):
         # 刷新下拉框中的物品类型
+        # 需要先解绑，否则会程序崩溃
+        self.ui.sort_comboBox.disconnect()
         self.ui.sort_comboBox.clear()
+        # 数据库操作
         conn = sqlite3.connect('item.db')
         cur = conn.cursor()
         cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
@@ -185,6 +192,25 @@ class MainWindow(QMainWindow):
         for table in tables:
             self.ui.sort_comboBox.addItem(table[0])
         conn.close()
+        # 重新绑上
+        self.ui.sort_comboBox.currentIndexChanged.connect(self.displayItem)
+        self.displayItem()
+
+    # 更多操作
+    def adminOperate(self):
+        self.aw.show()
+        # 建议直接关闭主界面
+        self.close()
+
+    def back2Login(self):
+        print(1)
+
+    def helpMe(self):
+        print(3)
+
+    # 这个地方有希望改，写的比较烂
+    def set_references(self, aw):
+        self.aw = aw
 
 # #主程序
 # if __name__ == '__main__':
@@ -215,6 +241,9 @@ if __name__ == '__main__':
 
     # 创建对象
     mw = MainWindow()
+    aw = AdminWindow()
+    mw.set_references(aw)
+    aw.set_references(mw)
     mw.show()
 
     # 进入程序的主循环，并通过exit函数确保主循环安全结束(该释放资源的一定要释放)
