@@ -1,7 +1,9 @@
 import sqlite3
 import sys
 
-from PyQt5.QtWidgets import QApplication, QMainWindow, QTableWidgetItem, QHeaderView, QAbstractItemView
+from PyQt5.QtCore import Qt, QPoint
+from PyQt5.QtWidgets import QApplication, QMainWindow, QTableWidgetItem, QHeaderView, QAbstractItemView, QMenu, QAction, \
+    QMessageBox
 
 from login import LoginWindow, RegisterWindow
 from dialog import InputDialog
@@ -13,9 +15,12 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+        # 更多的UI设置
         # QTableWidget设置整行选中
         self.ui.tableWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.ui.tableWidget.setSelectionMode(QAbstractItemView.SingleSelection)
+        # 表格右击事件的相关设置
+        self.ui.tableWidget.setContextMenuPolicy(Qt.CustomContextMenu) # 设置自定义上下文菜单策略
 
         # 添加一些表格，默认课程要求的3中类型
         conn = sqlite3.connect('item.db')
@@ -26,6 +31,7 @@ class MainWindow(QMainWindow):
                         名称 TEXT NOT NULL,
                         保质期 TEXT NOT NULL,
                         数量 TEXT NOT NULL,
+                        联系人 TEXT NOT NULL,
                         地址 TEXT NOT NULL,
                         手机 TEXT NOT NULL,
                         邮箱 TEXT NOT NULL,
@@ -38,6 +44,7 @@ class MainWindow(QMainWindow):
                         名称 TEXT NOT NULL,
                         作者 TEXT NOT NULL,
                         出版社 TEXT NOT NULL,
+                        联系人 TEXT NOT NULL,
                         地址 TEXT NOT NULL,
                         手机 TEXT NOT NULL,
                         邮箱 TEXT NOT NULL,
@@ -49,6 +56,7 @@ class MainWindow(QMainWindow):
                         ID INTEGER PRIMARY KEY AUTOINCREMENT,  
                         名称 TEXT NOT NULL,
                         地址 TEXT NOT NULL,
+                        联系人 TEXT NOT NULL,
                         手机 TEXT NOT NULL,
                         邮箱 TEXT NOT NULL,
                         描述 TEXT NOT NULL
@@ -60,6 +68,10 @@ class MainWindow(QMainWindow):
         # 信号与槽
         self.ui.add_pushButton.clicked.connect(self.addItem)
         self.ui.sort_comboBox.currentIndexChanged.connect(self.displayItem)
+        self.ui.findAll_pushButton.clicked.connect(self.displayItem)
+        self.ui.findKeyWord_pushButton.clicked.connect(self.findItem)
+        # 表格右击的信号与槽
+        self.ui.tableWidget.customContextMenuRequested.connect(self.showContextMenu)
 
         self.refreshSort()
 
@@ -77,7 +89,45 @@ class MainWindow(QMainWindow):
         self.ipw = InputDialog(columns, tableName, self)
         self.ipw.show()
 
+    def findItem(self):
+        print(1)
+
+    # 表格右击删除相关
+
+    def showContextMenu(self, pos):
+        # 获取当前选中的行
+        indexes = self.ui.tableWidget.selectedIndexes()
+        if not indexes:
+            return  # 如果没有选中的行，则不显示菜单
+        self.tableRow = indexes[0].row()
+        # 创建菜单
+        menu = QMenu(self)
+        # 创建删除菜单项
+        deleteAction = QAction("删除", self)
+        menu.addAction(deleteAction)
+        # 连接删除菜单项的触发信号
+        deleteAction.triggered.connect(self.deleteItem)
+        # 弹出菜单
+        adjusted_pos = pos + QPoint(70, 250) # 目前是根据UI手工调的，应该会有更好的办法
+        menu.exec_(self.mapToGlobal(adjusted_pos))
+
+    def deleteItem(self):
+        # 弹出提示框，删除是不可逆操作，建议给出提示
+        reply = QMessageBox.information(self, "消息对话框", "删除是不可逆操作，您确认删除吗？", QMessageBox.Yes | QMessageBox.Cancel,  QMessageBox.Yes)
+        if reply == 16384:
+            # 数据库操作，需要先查找再删除
+            tableName = self.ui.sort_comboBox.currentText()
+            rowID = self.ui.tableWidget.item(self.tableRow, 0).text()
+            conn = sqlite3.connect('item.db')
+            cur = conn.cursor()
+            cur.execute(f"DELETE FROM {tableName} WHERE id = ?", (rowID,))  # 数据库索引和表格索引不同
+            conn.commit()
+            conn.close()
+            # 表格中显式删除
+            self.displayItem()
+
     # 刷新
+
     def displayItem(self):
         # 删除原有信息
         while self.ui.tableWidget.rowCount() > 0:
@@ -118,6 +168,7 @@ class MainWindow(QMainWindow):
             self.ui.sort_comboBox.addItem(table[0])
         conn.close()
 
+# #主程序
 # if __name__ == '__main__':
 #     # 只有直接运行这个脚本，才会往下执行
 #     # 别的脚本文件执行，不会调用这个条件句
