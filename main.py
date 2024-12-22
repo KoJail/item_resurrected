@@ -1,3 +1,17 @@
+# -*- coding: utf-8 -*- #
+
+# ------------------------------------------------------------------
+# File Name:        main.py
+# Author:           KoJail
+# Version:          ver0_1
+# Created:          2024/12/22
+# Description:      定义了主界面类，主要功能为添加物品信息、删除物品信息、显示物品列表、按关键字查找物品信息
+#                   主程序在此
+# Function List:
+# History:
+#       <author>        <version>       <time>      <desc>
+#       KoJail          ver0_1          2024/12/22  xxx
+# ------------------------------------------------------------------
 import sqlite3
 import sys
 
@@ -16,6 +30,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+        self.setWindowTitle('主界面')
         # 更多的UI设置
         # QTableWidget设置整行选中
         self.ui.tableWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
@@ -108,6 +123,8 @@ class MainWindow(QMainWindow):
         infos = cur.fetchall()  # 获取所有列的信息
         columns = [info[1] for info in infos]
         conn.close()
+        # 清空文本框
+        self.ui.findKeyWord_lineEdit.clear()
         # 表格中显示
         self.showItem(results, columns)
 
@@ -124,7 +141,8 @@ class MainWindow(QMainWindow):
         # 将列表数据填充到表格中
         for row, data in enumerate(rows):
             for column, value in enumerate(data):
-                self.ui.tableWidget.setItem(row, column, QTableWidgetItem(str(value)))
+                if value:
+                    self.ui.tableWidget.setItem(row, column, QTableWidgetItem(str(value)))
         for i in range(len(columns)):
             if self.ui.tableWidget.horizontalHeaderItem(i).text() != '手机':
                 self.ui.tableWidget.horizontalHeader().setSectionResizeMode(i,QHeaderView.ResizeToContents)  # 设置第i列要根据内容使用宽度
@@ -144,7 +162,7 @@ class MainWindow(QMainWindow):
         # 连接删除菜单项的触发信号
         deleteAction.triggered.connect(self.deleteItem)
         # 弹出菜单
-        adjusted_pos = pos + QPoint(70, 250) # 目前是根据UI手工调的，应该会有更好的办法
+        adjusted_pos = pos + QPoint(70, 200) # 目前是根据UI手工调的，应该会有更好的办法
         menu.exec_(self.mapToGlobal(adjusted_pos))
 
     def deleteItem(self):
@@ -208,7 +226,6 @@ class MainWindow(QMainWindow):
         self.close()
 
     def back2Login(self):
-        self.lw.clearText()
         self.lw.show()
         self.close()
 

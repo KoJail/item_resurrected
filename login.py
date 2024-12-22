@@ -1,3 +1,17 @@
+# -*- coding: utf-8 -*- #
+
+# ------------------------------------------------------------------
+# File Name:        login.py
+# Author:           KoJail
+# Version:          ver0_1
+# Created:          2024/12/22
+# Description:      定义了登录界面类，主要功能是登录
+#                   定义了注册界面类，主要功能是注册账号
+# Function List:
+# History:
+#       <author>        <version>       <time>      <desc>
+#       KoJail          ver0_1          2024/12/22  xxx
+# ------------------------------------------------------------------
 import sys
 
 import sqlite3
@@ -12,7 +26,7 @@ class LoginWindow(QWidget):
         super().__init__()
         self.ui = Ui_LoginWindow()
         self.ui.setupUi(self)
-        self.setWindowTitle('login_page')
+        self.setWindowTitle('登录页')
 
         # 数据库相关操作
         conn = sqlite3.connect('user.db')
@@ -77,11 +91,13 @@ class LoginWindow(QWidget):
 
     def register(self):
         self.rw.show()
+        self.clearText()
         self.close()
 
     def goToMain(self, isAdmin):
         self.mw.ISAdmin(isAdmin)
         self.mw.show()
+        self.clearText()
         self.close()
 
     def setReferences(self, rw, mw):
@@ -94,7 +110,7 @@ class RegisterWindow(QWidget):
         super().__init__()
         self.ui = Ui_RegisterWindow()
         self.ui.setupUi(self)
-        self.setWindowTitle('register_page')
+        self.setWindowTitle('注册页')
 
         # 信号与槽
         self.ui.confirm_pushButton.clicked.connect(self.register)
@@ -140,14 +156,23 @@ class RegisterWindow(QWidget):
         if registerdone == True:
             self.quit()
 
+    def clearText(self):
+        self.ui.userName_lineEdit.clear()
+        self.ui.password_lineEdit.clear()
+        self.ui.repassword_lineEdit.clear()
+        self.ui.adress_lineEdit.clear()
+        self.ui.phone_lineEdit.clear()
+        self.ui.aduserName_lineEdit.clear()
+        self.ui.adpassword_lineEdit.clear()
+
     def quit(self):
-        self.lw.clearText()
         self.lw.show()
+        self.clearText()
         self.close()
 
     def closeEvent(self, event):
-        self.lw.clearText()
         self.lw.show()
+        self.clearText()
         event.accept()
 
     def setReferences(self, lw):

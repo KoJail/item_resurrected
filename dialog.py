@@ -1,3 +1,17 @@
+# -*- coding: utf-8 -*- #
+
+# ------------------------------------------------------------------
+# File Name:        dialog.py
+# Author:           KoJail
+# Version:          ver0_1
+# Created:          2024/12/22
+# Description:      定义了多输入对话框类，主要功能是添加物品信息
+#                   以后其他的自定义对话框类都会写在这里
+# Function List:
+# History:
+#       <author>        <version>       <time>      <desc>
+#       KoJail          ver0_1          2024/12/22  xxx
+# ------------------------------------------------------------------
 import sqlite3
 import sys
 
