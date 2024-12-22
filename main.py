@@ -125,8 +125,9 @@ class MainWindow(QMainWindow):
         for row, data in enumerate(rows):
             for column, value in enumerate(data):
                 self.ui.tableWidget.setItem(row, column, QTableWidgetItem(str(value)))
-        for i in range(len(columns) - 1):
-            self.ui.tableWidget.horizontalHeader().setSectionResizeMode(i,QHeaderView.ResizeToContents)  # 设置第i列要根据内容使用宽度
+        for i in range(len(columns)):
+            if self.ui.tableWidget.horizontalHeaderItem(i).text() != '手机':
+                self.ui.tableWidget.horizontalHeader().setSectionResizeMode(i,QHeaderView.ResizeToContents)  # 设置第i列要根据内容使用宽度
 
     # 表格右击删除相关
     def showContextMenu(self, pos):
@@ -198,11 +199,16 @@ class MainWindow(QMainWindow):
 
     # 更多操作
     def adminOperate(self):
+        if not self.isAdmin:
+            QMessageBox.information(self, "消息对话框", "您不是管理员哟",
+                                    QMessageBox.Ok, QMessageBox.Ok)
+            return
         self.aw.show()
         # 建议直接关闭主界面
         self.close()
 
     def back2Login(self):
+        self.lw.clearText()
         self.lw.show()
         self.close()
 
@@ -210,9 +216,12 @@ class MainWindow(QMainWindow):
         QMessageBox.information(self, "消息对话框", "詳情可見https://github.com/KoJail/item_resurrected", QMessageBox.Ok, QMessageBox.Ok)
 
     # 这个地方有希望改，写的比较烂
-    def set_references(self, aw, lw):
+    def setReferences(self, aw, lw):
         self.aw = aw
         self.lw = lw
+
+    def ISAdmin(self, isAdmin):
+        self.isAdmin = isAdmin
 
 #主程序
 if __name__ == '__main__':
@@ -229,9 +238,9 @@ if __name__ == '__main__':
     aw = AdminWindow()
     # 这边做法比较粗暴，相互引用一下
     lw.setReferences(rw, mw)
-    rw.set_references(lw)
-    mw.set_references(aw, lw)
-    aw.set_references(mw)
+    rw.setReferences(lw)
+    mw.setReferences(aw, lw)
+    aw.setReferences(mw)
     # 显示初始界面
     lw.show()
 

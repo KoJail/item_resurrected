@@ -90,5 +90,5 @@ class AdminWindow(QWidget):
         event.accept()
         self.mw.refreshSort()
 
-    def set_references(self, mw):
+    def setReferences(self, mw):
         self.mw = mw

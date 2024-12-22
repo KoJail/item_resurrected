@@ -61,21 +61,26 @@ class LoginWindow(QWidget):
                 if users_pas is None:
                     QMessageBox.information(self, "消息对话框", "用户名或密码错误！", QMessageBox.Ok, QMessageBox.Ok)
                 elif password == users_pas[0]:  # 普通用户登录
-                    self.goToMain()
+                    self.goToMain(False)
                 else:
                     QMessageBox.information(self, "消息对话框", "用户名或密码错误！", QMessageBox.Ok, QMessageBox.Ok)
             elif password == admin_pas[0]: # 管理员登录
-                self.goToMain()
+                self.goToMain(True)
             else:
                 QMessageBox.information(self, "消息对话框", "用户名或密码错误！", QMessageBox.Ok, QMessageBox.Ok)
 
             conn.close()
 
+    def clearText(self):
+        self.ui.userName_lineEdit.clear()
+        self.ui.password_lineEdit.clear()
+
     def register(self):
         self.rw.show()
         self.close()
 
-    def goToMain(self):
+    def goToMain(self, isAdmin):
+        self.mw.ISAdmin(isAdmin)
         self.mw.show()
         self.close()
 
@@ -136,14 +141,16 @@ class RegisterWindow(QWidget):
             self.quit()
 
     def quit(self):
+        self.lw.clearText()
         self.lw.show()
         self.close()
 
     def closeEvent(self, event):
+        self.lw.clearText()
         self.lw.show()
         event.accept()
 
-    def set_references(self, lw):
+    def setReferences(self, lw):
         self.lw = lw
 
 # if __name__ == '__main__':
