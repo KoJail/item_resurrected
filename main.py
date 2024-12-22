@@ -75,6 +75,7 @@ class MainWindow(QMainWindow):
 
         self.refreshSort()
 
+    # 添加物品相关
     def addItem(self):
         tableName = self.ui.sort_comboBox.currentText()
         # 数据库操作
@@ -89,8 +90,38 @@ class MainWindow(QMainWindow):
         self.ipw = InputDialog(columns, tableName, self)
         self.ipw.show()
 
+    # 关键字查找相关
     def findItem(self):
-        print(1)
+        keyWord = self.ui.findKeyWord_lineEdit.text()
+        tableName = self.ui.sort_comboBox.currentText()
+        # 数据库操作
+        conn = sqlite3.connect('item.db')
+        cur = conn.cursor()
+        cur.execute(f"SELECT * FROM {tableName} WHERE 名称 LIKE ? OR 描述 LIKE ?", ('%' + keyWord + '%', '%' + keyWord + '%',))
+        results = cur.fetchall()
+        cur.execute(f"PRAGMA table_info({tableName})")  # 查询表的列信息
+        infos = cur.fetchall()  # 获取所有列的信息
+        columns = [info[1] for info in infos]
+        conn.close()
+        # 表格中显示
+        self.showItem(results, columns)
+
+    def showItem(self, rows, columns):
+        # 删除原有信息
+        while self.ui.tableWidget.rowCount() > 0:
+            self.ui.tableWidget.removeRow(0)
+        # 添加查到的信息
+        # 设置表格的行数和列数
+        self.ui.tableWidget.setRowCount(len(rows))
+        self.ui.tableWidget.setColumnCount(len(columns))
+        # 设置表头（可选）
+        self.ui.tableWidget.setHorizontalHeaderLabels(columns)
+        # 将列表数据填充到表格中
+        for row, data in enumerate(rows):
+            for column, value in enumerate(data):
+                self.ui.tableWidget.setItem(row, column, QTableWidgetItem(str(value)))
+        for i in range(len(columns) - 1):
+            self.ui.tableWidget.horizontalHeader().setSectionResizeMode(i,QHeaderView.ResizeToContents)  # 设置第i列要根据内容使用宽度
 
     # 表格右击删除相关
 
@@ -128,12 +159,10 @@ class MainWindow(QMainWindow):
 
     # 刷新
 
+    # 显示所有同一类的条目，需要和findItem的用到的showItem函数区分
     def displayItem(self):
-        # 删除原有信息
-        while self.ui.tableWidget.rowCount() > 0:
-            self.ui.tableWidget.removeRow(0)
-        # 数据库操作
         tableName = self.ui.sort_comboBox.currentText()
+        # 数据库操作
         conn = sqlite3.connect('item.db')
         cur = conn.cursor()
         cur.execute(f"PRAGMA table_info({tableName})")  # 查询表的列信息
@@ -143,19 +172,8 @@ class MainWindow(QMainWindow):
         rows = cur.fetchall()
         conn.commit()
         conn.close()
-        # 添加所有信息
-        # 设置表格的行数和列数
-        self.ui.tableWidget.setRowCount(len(rows))
-        self.ui.tableWidget.setColumnCount(len(columns))
-        # 设置表头（可选）
-        self.ui.tableWidget.setHorizontalHeaderLabels(columns)
-        # 将列表数据填充到表格中
-        for row, data in enumerate(rows):
-            for column, value in enumerate(data):
-                self.ui.tableWidget.setItem(row, column, QTableWidgetItem(str(value)))
-        for i in range(len(columns)-1):
-            self.ui.tableWidget.horizontalHeader().setSectionResizeMode(i, QHeaderView.ResizeToContents)  # 设置第i列要根据内容使用宽度
-
+        # 表格显示
+        self.showItem(rows, columns)
 
     def refreshSort(self):
         # 刷新下拉框中的物品类型
